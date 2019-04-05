@@ -1,0 +1,22 @@
+function [curves_zerocross,curves_mag]  = extractedge(pic, scale, ts, shape)
+if (nargin < 4) 
+    shape = 'same';
+end
+
+%discgaussfft(pic, scale)
+Lvvtilde = LVVtilde(discgaussfft(pic, scale), shape);
+Lvvvtilde= LVVVtilde(discgaussfft(pic, scale), shape);
+
+Lvcomp = Lv(discgaussfft(pic, scale), scale, shape);
+magnitude_mask = (Lvcomp > ts) - 0.3; % as lvcomp correponds to the gradient magnitude we can threshold on this succer
+
+
+
+Lvvv_mask = (Lvvvtilde < 0) - 0.3; %since (LVVVtilde < 0) gives us 0 and 1. and zerocrosscurves only preservers 
+%points on the zero-crossing curves for which the mask value is
+%non-negative. Thus we keep values where LVVVtilde <0 later in zerocrosscurves
+
+curves_zerocross = zerocrosscurves(Lvvtilde, Lvvv_mask);
+curves_mag = thresholdcurves(curves_zerocross, magnitude_mask);
+
+end
